@@ -268,11 +268,13 @@ NativeModule.prototype.compile = function() {
   var source = NativeModule.getSource(this.id);
   source = NativeModule.wrap(source);
 
+  //runInThisContext()沒有執行source這段函數代碼，它只是轉化這段代碼字符串成爲可執行的函數，貼切來說，應該叫converToRunnableInThisContext()更容易理解
   var fn = runInThisContext(source, {
     filename: this.filename,
     lineOffset: 0
   });
-  fn(this.exports, NativeModule.require, this, this.filename);
+  // 現在才是真正執行這段代碼。構建require的module
+  fn(this.exports, NativeModule.require, this, this.filename);
 
   this.loaded = true;
 };
@@ -280,7 +282,7 @@ NativeModule.prototype.compile = function() {
 
 `wrap` 函数将 http.js 包裹起来, 交由 `runInThisContext` 编译源码，返回 fn 函数, 依次将参数传人。
 
-
+以下的內容進入對`runInThisContext`的背景探討。
 
 ### process
 先看看 node.js 的底层 C++ 传递给 javascript 的一个变量 process，在一开始运行 node.js 时，程序会先配置好 process 
