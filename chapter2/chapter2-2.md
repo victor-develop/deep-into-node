@@ -311,6 +311,7 @@ Local f = Local::Cast(f_value);
 Localglobal = v8::Context::GetCurrent()->Global();
 
 Local args[1] = {
+  //把process轉換成本地變量類型？
   Local::New(process) 
 };
 
