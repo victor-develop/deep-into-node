@@ -43,6 +43,7 @@ static const struct _native natives[] = {{ “node”, node_native, sizeof(node_
 
 {“dgram”, dgram_native, sizeof(dgram_native)-1 },
 
+// 把JS代碼存進字符串
 {“console”, console_native, sizeof(console_native)-1 },
 
 {“buffer”, buffer_native, sizeof(buffer_native)-1 },
@@ -63,50 +64,62 @@ static const struct _native natives[] = {{ “node”, node_native, sizeof(node_
 
 ```c++
 static void Binding(const FunctionCallbackInfo<Value>& args) {
-  Environment* env = Environment::GetCurrent(args);
-
-  Local<String> module = args[0]->ToString(env->isolate());
-  node::Utf8Value module_v(env->isolate(), module);
-
-  Local<Object> cache = env->binding_cache_object();
+  // 根據args 獲取環境變量?
+  Environment* env = Environment::GetCurrent(args);
+  // isoliate()是?待查。
+  Local<String> module = args[0]->ToString(env->isolate());
+  // module_v待查
+  node::Utf8Value module_v(env->isolate(), module);
+  // 從環境獲取cache
+  Local<Object> cache = env->binding_cache_object();
   Local<Object> exports;
 
   if (cache->Has(module)) {
-    exports = cache->Get(module)->ToObject(env->isolate());
-    args.GetReturnValue().Set(exports);
+    // 從cache讀取模塊的exports
+    exports = cache->Get(module)->ToObject(env->isolate());
+    // 從這裏送到JS?
+    args.GetReturnValue().Set(exports);
     return;
   }
 
   // Append a string to process.moduleLoadList
   char buf[1024];
   snprintf(buf, sizeof(buf), "Binding %s", *module_v);
-
-  Local<Array> modules = env->module_load_list_array();
+  // 獲取模塊列表
+  Local<Array> modules = env->module_load_list_array();
   uint32_t l = modules->Length();
   modules->Set(l, OneByteString(env->isolate(), buf));
 
+  // 內建模塊的獲取
   node_module* mod = get_builtin_module(*module_v);
   if (mod != nullptr) {
+    // new的？
     exports = Object::New(env->isolate());
     // Internal bindings don't have a"module" object, only exports.
+    // 先跳過這兩行
     CHECK_EQ(mod->nm_register_func, nullptr);
     CHECK_NE(mod->nm_context_register_func, nullptr);
     Local<Value> unused = Undefined(env->isolate());
-    // **for builtin module**
-    mod->nm_context_register_func(exports, unused,
+    // **for builtin module** 註冊js的東西
+    mod->nm_context_register_func(exports, unused,
       env->context(), mod->nm_priv);
+    // 存緩存
     cache->Set(module, exports);
-  } else if (!strcmp(*module_v,"constants")) {
-    exports = Object::New(env->isolate());
+  }// 常數module有不同的邏輯
+    else if (!strcmp(*module_v,"constants")) {
+    // 還是new出來的。
+    exports = Object::New(env->isolate());
     // for constants
     DefineConstants(exports);
     cache->Set(module, exports);
+            //native模塊另有套路
   } else if (!strcmp(*module_v,"natives")) {
     exports = Object::New(env->isolate());
-    // for native module
-    DefineJavaScript(env, exports);
+    // defineJavaScript? 會跑一邊嗎？
+    DefineJavaScript(env, exports);
     cache->Set(module, exports);
   } else {
+    //找不到模塊的錯誤處理
     char errmsg[1024];
     snprintf(errmsg,
              sizeof(errmsg),
@@ -115,6 +128,7 @@ static void Binding(const FunctionCallbackInfo<Value>& args) {
     return env->ThrowError(errmsg);
   }
 
+  // 傳給JS？
   args.GetReturnValue().Set(exports);
 }
 ```
