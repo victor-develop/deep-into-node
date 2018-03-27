@@ -132,7 +132,11 @@ static void Binding(const FunctionCallbackInfo<Value>& args) {
   args.GetReturnValue().Set(exports);
 }
 ```
-* builtin 优先级最高。对于任何一个需要绑定的模块，都会优先到 builtin 模块列表 modlist_builtin 中去查找。查找过程非常简单，直接遍历这个列表，找到模块名字相同的那个模块即可。找到这个模块后，模块的注册函数会先被执行，且将一个重要的数据 exports 返回。对于 builtin module 而言，exports object 包含了 builtin C++ 模块暴露出来的接口名以及对于的代码。例如对模块 tcp_wrap 而言，exports 包含的内容可以用如下格式表示： {“TCP”: “/function code of TCPWrap entrance/”, “TCPConnectWrap”: “/function code of TCPConnectWrap entrance/”}。
+* builtin 优先级最高。对于任何一个需要绑定的模块，都会优先到 builtin 模块列表 modlist_builtin 中去查找。查找过程非常简单，直接遍历这个列表，找到模块名字相同的那个模块即可。找到这个模块后，模块的注册函数会先被执行，且将一个重要的数据 exports 返回。对于 builtin module 而言，exports object 包含了 
+  - builtin C++ 模块暴露出来的__接口名__以及對應的__代码__。
+例如对模块 tcp_wrap 而言，exports 包含的内容可以用如下格式表示： 
+
+> {“TCP”: “/function code of TCPWrap entrance/”, “TCPConnectWrap”: “/function code of TCPConnectWrap entrance/”}。
 
 * constants 模块优先级次之。node 中的常量定义通过 constants 导出。导出的 exports 格式如下: {“SIGHUP”:1, “SIGKILL”:9, “SSL_OP_ALL”: 0x80000BFFL}
 
