@@ -20,7 +20,8 @@ Node采用V8作为JavaScript的执行引擎，同时使用libuv实现事件驱�
 ```c++
 Environment* env = CreateEnvironment(
         node_isolate,
-        uv_default_loop(),
+        // default loop的初始化在這裏
+        uv_default_loop(),
         context,
         argc,
         argv,
@@ -31,6 +32,8 @@ Environment* env = CreateEnvironment(
 ```c++
 bool more;
 do {
+  // 執行一次event loop
+  // 會阻塞住直到有IO event/定時器到點, TODO: read deeper
   more = uv_run(env->event_loop(), UV_RUN_ONCE);
   if (more == false) {
     EmitBeforeExit(env);
