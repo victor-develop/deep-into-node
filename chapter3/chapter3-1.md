@@ -7,7 +7,9 @@
 * [deps/uv/src/unix/timer.c](https://github.com/nodejs/node/blob/master/deps/uv/src/unix/timer.c)
 * [deps/uv/src/heap-inl.h](https://github.com/nodejs/node/blob/master/deps/uv/src/heap-inl.h)
 
-主要分为 javascript 层面的实现和 `libuv` 层面的实现, 而timer_wrap.cc 作为一个bridge,完成 javascript 和 C++的交互调用。
+主要分为 javascript 层面的实现和 `libuv` 层面的实现, 
+
+> 而timer_wrap.cc 作为一个bridge,完成 javascript 和 C++的交互调用。
 
 ### 使用场景
 定时器主要的使用场景或者说适用场景：
